@@ -1,0 +1,15 @@
+our $lang = {
+   'vala' => [  # file type
+        ["//"],  # line comment
+        [["/*","*/"]],  # block comment
+        [  # regexes
+            ['[^, \t]([ \t]+)\(\)', "space before empty brackets", 1],
+            ['\){', "no space between method bracket and next block bracket", 0],
+            ['[\t]+', "usage of tab", 0],
+            ['[ \t]+$', "space character at end of line", 0],
+            ['\)=>|=>{', "no space arround lambda method", 0],
+            ['[^ "]([ ]{2,})', "multiple spaces", 1]
+        ],
+             ],
+    'vapi' => 'vala',
+};
