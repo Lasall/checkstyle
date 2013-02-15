@@ -44,8 +44,10 @@ our $lang = {
         [["/*","*/"]],  # block comment
         [  # regexes what to check
             ['[^, \t]([ \t]+)\(\)', "space before empty brackets", 1],
+            ['[^ \t!_("$]\([^\)]', "missing space before method parameter bracket", 0],
             ['\){', "no space between method bracket and next block bracket", 0],
             ['[\t]+', "usage of tab", 0],
+            ['[ \t]+;', "space before semikolon", 0],
             ['[ \t]+$', "space character at end of line", 0],
             ['\)=>[{]?|=>{', "no space arround lambda method operator", 0],
             ['[^ "]([ ]{2,})', "multiple spaces", 1],
@@ -55,6 +57,11 @@ our $lang = {
             ['[^ \t<>!=+-]=[ \t]', "no space arround assignment operator", 0],    # aX b
             ['([ \t]=[^ \t>=]).', "no space arround assignment operator", 1],     # a Xb
             ['[^ \t<>!=+-]=[^ \t>=]', "no space arround assignment operator", 0], # aXB
+            ['[^ \t"]{', "no space before beginning block", 0],
+            ['({[^ \t}]).', "no space after beginning block", 1],
+            ['[ \t]((?:g|s)et{)', "no space arround getter/setter method", 1],
+            ['{(?:g|s)et[ \t;]', "no space arround getter/setter method", 0],
+            ['[^ \t]([ \t]+)\[', "space before array index", 1],
         ]
              ],
     'vapi' => 'vala',
