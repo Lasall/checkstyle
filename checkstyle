@@ -94,7 +94,6 @@ foreach my $filename (@files) {
     open(FILE, "<", $filename) or die $!;
     while (<FILE>) {
         my $line = $_;
-        my $comment = 0;
         my $errline = undef;
         ++$line_cnt;
         ++$line_cnt_glob;
@@ -114,16 +113,13 @@ foreach my $filename (@files) {
                 }
             }
         }
+
+        my $oldline = $line;
         foreach (@comment_line_match) {
-            if ($line =~ /(?:\\\")?[^"]*\Q$_\E/) {
-                $comment = 1;
-                last;
-            } else {
-                $comment = 0;
-            }
+            $line =~ s/((?:\\\")?[^" \t]*)[ \t]*\Q$_\E.*/$1/;
         }
 
-        if ($comment || $blockcomment) {
+        if ($blockcomment) {
             ++$comment_cnt;
             ++$comment_cnt_glob;
             next;
@@ -144,6 +140,7 @@ foreach my $filename (@files) {
             ++$valid_cnt_glob;
             next;
         }
+        $line = $oldline;
 
         my $arrow = colored("<----", 'bright_red');
         $errline = colored($errline, 'red');
