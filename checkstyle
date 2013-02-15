@@ -9,7 +9,7 @@ use Pod::Usage;
 my $app_version = 0.1;
 
 my $opt_config = "$ENV{'HOME'}/.checkstylerc";
-my ($opt_quiet, $opt_silent, $opt_summary, $opt_help, $opt_man, $opt_version);
+my ($opt_quiet, $opt_silent, $opt_summary, $opt_lang, $opt_help, $opt_man, $opt_version);
 
 Getopt::Long::Configure ("bundling");
 GetOptions (
@@ -17,6 +17,7 @@ GetOptions (
     'quiet!'    => \$opt_quiet,
     'silent|s!' => \$opt_silent,
     'summary|i!'=> \$opt_summary,
+    'lang|language|l=s' => \$opt_lang,
     'help!'     => \$opt_help,
     'man!'      => \$opt_man,
     'version!'  => \$opt_version,
@@ -32,7 +33,7 @@ if (defined $opt_version) {
           "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n",
           "  This is free software: you are free to change and redistribute it.\n",
           "  There is NO WARRANTY, to the extent permitted by law.\n";
-    exit ;
+    exit;
 }
 
 $opt_quiet = 1 if defined $opt_silent;
@@ -58,10 +59,15 @@ foreach my $filename (@files) {
     next unless (-f $filename);
     ++$file_cnt;
 
-    my $filetype = $1 if $filename =~ /\.([^.]+)$/;
-    unless (defined $filetype) {
-        print STDERR "No filetype: $filename\n" unless defined $opt_quiet;
-        next;
+    my $filetype;
+    unless (defined $opt_lang) {
+        $filetype = $1 if $filename =~ /\.([^.]+)$/;
+        unless (defined $filetype) {
+            print STDERR "No filetype: $filename\n" unless defined $opt_quiet;
+            next;
+        }
+    } else {
+        $filetype = $opt_lang;
     }
 
     my (@comment_line_match, @comment_block_match, @matchexpressions);
@@ -199,7 +205,7 @@ checkstyle - check code style for common style issues
 
 =head1 SYNOPSIS
 
- checkstyle [-hmqsiv] [-c=configfile] file1,file2,...
+ checkstyle [-hmqsiv] [-c=configfile] [-l=language] file1,file2,...
 
  Code files have to be supported by configuration file:
    - line comment marker
@@ -233,6 +239,10 @@ Only output list of style errors. Implies --quiet.
 =item B<--summary>
 
 Explicitly output summary. Use this with --silent.
+
+=item B<--language>
+
+Force specific language (file extension).
 
 =item B<--config>
 
