@@ -93,36 +93,40 @@ foreach my $filename (@files) {
 
     open(FILE, "<", $filename) or die $!;
     while (<FILE>) {
-        my $line = $_;
+        my $line = my $oldline = $_;
         my $errline = undef;
+        my $offset = 0;
         ++$line_cnt;
         ++$line_cnt_glob;
 
         # Check for comment.
         if ($blockcomment) {
-            foreach my $i (0..$#comment_block_match) {
+            foreach my $i (0..$#comment_block_match) {  # end of block
                 if ($line =~ /\Q$comment_block_match[$i][1]\E/) {
+                    $line =~ s/.*\Q$comment_block_match[$i][1]\E//;
+                    $offset = $+[0];
                     $blockcomment = 0;
                 }
             }
-            next unless $blockcomment;
         } else {
-            foreach my $i (0..$#comment_block_match) {
+            foreach my $i (0..$#comment_block_match) {  # start of block
                 if ($line =~ /(?:\\\")?[^"]*\Q$comment_block_match[$i][0]\E/) {
-                    $blockcomment = 1;
+                    $line =~ s/[ \t]*\Q$comment_block_match[$i][0]\E.*//;
+                    $blockcomment = -1;
                 }
             }
         }
 
-        my $oldline = $line;
-        foreach (@comment_line_match) {
-            $line =~ s/((?:\\\")?[^" \t]*)[ \t]*\Q$_\E.*/$1/;
-        }
-
-        if ($blockcomment) {
+        if ($blockcomment > 0) {
             ++$comment_cnt;
             ++$comment_cnt_glob;
             next;
+        } elsif ($blockcomment < 0) {
+            $blockcomment = 1;
+        }
+
+        foreach (@comment_line_match) {
+            $line =~ s/((?:\\\")?[^" \t]*)[ \t]*\Q$_\E.*/$1/;
         }
 
         # Check syntax.
@@ -130,8 +134,8 @@ foreach my $filename (@files) {
         foreach my $i (0..$#matchexpressions) {
             if ($line =~ /$matchexpressions[$i][0]/) {
                 $errline = $matchexpressions[$i][1];
-                $begin = $-[$matchexpressions[$i][2]];
-                $end = $+[$matchexpressions[$i][2]];
+                $begin = $-[$matchexpressions[$i][2]] + $offset;
+                $end = $+[$matchexpressions[$i][2]] + $offset;
                 last;
             }
         }

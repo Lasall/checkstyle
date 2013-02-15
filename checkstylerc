@@ -1,21 +1,61 @@
+#
+# See an example which describes the file syntax:
+#
+# ... {
+#   # languages (hash)
+#    'c'   => [  <--- file extension
+#       # one dimensional array for inline comments
+#       [],  <--- no inline comment; multiple inline comments ---> ["//","abc"],
+#
+#       # two dimensional array for block comments
+#       [ [
+#          "/*",  <--- start marker of block comment
+#          "*/"  <--- end marker of block comment
+#         ],
+#         ["{{{","}}}"],  <--- other block comment markers
+#       ],  no block comment ---> [[]],
+#
+#       # two dimensional array for regexes
+#       [
+#         ['[ ]{2,}',  <--- regex to match as style error, use perl regexes
+#          "this is a bad habit",  <--- description of style error
+#          0  <--- number of match group (if they are more than one)
+#         ],
+#         ['foo(bar)',
+#          "don't use foobar in real world code",
+#          1  <--- this will highlight only "bar" in 'foobar' regex
+#         ],
+#         ['barfoo', "yet another nogo", 0],
+#
+#         ...
+#
+#       ],
+#
+#    'h'   => 'c',  <--- redirect to 'c' checker
+#    'cpp' => [...],  <--- complete yourself (not valid syntax)
+#    'cc'  => 'cpp',
+#    'hpp' => 'cpp',
+#           ],
+# };
+#
 our $lang = {
    'vala' => [  # file type
         ["//"],  # line comment
         [["/*","*/"]],  # block comment
-        [  # regexes
+        [  # regexes what to check
             ['[^, \t]([ \t]+)\(\)', "space before empty brackets", 1],
             ['\){', "no space between method bracket and next block bracket", 0],
             ['[\t]+', "usage of tab", 0],
             ['[ \t]+$', "space character at end of line", 0],
-            ['\)=>[{]?|=>{', "no space arround lambda method", 0],
+            ['\)=>[{]?|=>{', "no space arround lambda method operator", 0],
             ['[^ "]([ ]{2,})', "multiple spaces", 1],
-            ['[^ \t<>!=][<>!=]=[ \t]', "no space arround comparison operator", 0],
-            ['[ \t][<>!=]=[^ \t>=]', "no space arround comparison operator", 0],
-            ['[^ \t<>!=][<>!=]=[^ \t>=]', "no space arround comparison operator", 0],
-            ['[^ \t<>!=]=[ \t]', "no space arround assignment operator", 0],
-            ['[ \t]=[^ \t>=]', "no space arround assignment operator", 0],
-            ['[^ \t<>!=]=[^ \t>=]', "no space arround assignment operator", 0],
-        ],
+            ['[^ \t<>!=+-][<>!=]=[ \t]', "no space arround comparison operator", 0],    # aX b
+            ['([ \t][<>!=+-]=[^ \t>=]).', "no space arround comparison operator", 1],   # a Xb
+            ['[^ \t<>!=+-][<>!=]=[^ \t>=]', "no space arround comparison operator", 0], # aXB
+            ['[^ \t<>!=+-]=[ \t]', "no space arround assignment operator", 0],    # aX b
+            ['([ \t]=[^ \t>=]).', "no space arround assignment operator", 1],     # a Xb
+            ['[^ \t<>!=+-]=[^ \t>=]', "no space arround assignment operator", 0], # aXB
+        ]
              ],
     'vapi' => 'vala',
 };
